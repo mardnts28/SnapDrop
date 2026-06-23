@@ -240,12 +240,14 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Floating Alert/Toast Notifications */}
+      {/* Centered Loading Indicator (No Box Container) */}
       {status === 'capturing' && (
-        <div className="absolute top-18 left-1/2 -translate-x-1/2 z-30 w-[90%] max-w-xs animate-fade-in">
-          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white border border-[#C4E2F5] text-slate-800 shadow-[0_4px_16px_rgba(44,94,173,0.08)]">
-            <LoaderIcon className="text-[#1591DC]" />
-            <span className="text-xs font-semibold tracking-tight text-[#2C5EAD]">Uploading to Drive...</span>
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center pointer-events-none animate-fade-in">
+          <div className="flex flex-col items-center gap-3">
+            <LoaderIcon className="h-8 w-8 text-[#1591DC] drop-shadow-[0_1px_3px_rgba(255,255,255,0.6)]" />
+            <span className="text-sm font-semibold tracking-tight text-[#2C5EAD] drop-shadow-[0_1px_3px_rgba(255,255,255,0.8)] select-none">
+              Saving to drive...
+            </span>
           </div>
         </div>
       )}
