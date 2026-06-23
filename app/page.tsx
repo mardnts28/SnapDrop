@@ -57,7 +57,7 @@ const LoaderIcon = ({ className = "h-4 w-4" }: { className?: string }) => (
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth="2.5"
     strokeLinecap="round"
     strokeLinejoin="round"
     className={`animate-spin ${className}`}
@@ -189,21 +189,21 @@ export default function Home() {
           playsInline
           autoPlay
           muted
-          className="absolute inset-0 h-full w-full object-cover z-0"
+          className="absolute inset-0 h-full w-full object-cover z-0 bg-black"
         />
       )}
 
-      {/* Modern Dual-Tone Viewfinder Reticle */}
+      {/* Modern Viewfinder Reticle using Light Blue (#4BB8FA) & Accent Blue (#1591DC) */}
       {status === 'idle' && (
         <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
-          <div className="relative w-60 h-60 border border-white/20 rounded-2xl shadow-[0_0_0_1px_rgba(0,0,0,0.05)]">
-            <div className="absolute top-0 left-0 w-6 h-6 border-t border-l border-white/70 rounded-tl-lg shadow-sm" />
-            <div className="absolute top-0 right-0 w-6 h-6 border-t border-r border-white/70 rounded-tr-lg shadow-sm" />
-            <div className="absolute bottom-0 left-0 w-6 h-6 border-b border-l border-white/70 rounded-bl-lg shadow-sm" />
-            <div className="absolute bottom-0 right-0 w-6 h-6 border-b border-r border-white/70 rounded-br-lg shadow-sm" />
+          <div className="relative w-60 h-60 border border-white/20 rounded-2xl">
+            <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#4BB8FA] rounded-tl-lg shadow-sm" />
+            <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#4BB8FA] rounded-tr-lg shadow-sm" />
+            <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#4BB8FA] rounded-bl-lg shadow-sm" />
+            <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#4BB8FA] rounded-br-lg shadow-sm" />
             
-            {/* Minimalist target point */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-white/80 rounded-full shadow-[0_0_2px_rgba(0,0,0,0.2)]" />
+            {/* Minimalist target point using Accent Blue */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-[#1591DC] rounded-full border-2 border-white shadow-md shadow-[#2C5EAD]/30" />
           </div>
         </div>
       )}
@@ -215,27 +215,27 @@ export default function Home() {
         }`} 
       />
 
-      {/* Floating Header Panel (Light & Glassmorphic) */}
+      {/* Floating Header Panel (Utilizing Pale Ice Blue #C4E2F5 & Deep Blue #2C5EAD) */}
       <header className="absolute top-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-30">
-        <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl bg-white/75 backdrop-blur-md border border-slate-200/50 shadow-[0_2px_12px_rgba(0,0,0,0.05)]">
+        <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl bg-white/80 backdrop-blur-md border border-[#C4E2F5]/60 shadow-[0_2px_12px_rgba(44,94,173,0.06)]">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900 text-white shadow-sm">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-[#2C5EAD] to-[#1591DC] text-white shadow-sm shadow-[#2C5EAD]/20">
               <CameraIcon className="h-4 w-4" />
             </div>
             <div>
-              <h1 className="text-xs font-semibold tracking-tight text-slate-800">
+              <h1 className="text-xs font-bold tracking-tight text-[#2C5EAD]">
                 SnapDrop
               </h1>
             </div>
           </div>
 
-          {/* Minimalist Connection Indicator */}
-          <div className="flex items-center gap-1.5 rounded-full bg-slate-100/80 px-2 py-0.5 text-[10px] font-medium text-slate-600 border border-slate-200/30">
+          {/* Connection Indicator using Accent Blue (#1591DC) & Ice Blue (#C4E2F5) */}
+          <div className="flex items-center gap-1.5 rounded-full bg-[#C4E2F5]/40 px-2.5 py-0.5 text-[10px] font-semibold text-[#2C5EAD] border border-[#4BB8FA]/20">
             <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-pulse rounded-full bg-slate-400 opacity-75"></span>
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-slate-500"></span>
+              <span className="absolute inline-flex h-full w-full animate-pulse rounded-full bg-[#1591DC] opacity-75"></span>
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#1591DC]"></span>
             </span>
-            Ready
+            Active
           </div>
         </div>
       </header>
@@ -243,20 +243,20 @@ export default function Home() {
       {/* Floating Alert/Toast Notifications */}
       {status === 'capturing' && (
         <div className="absolute top-18 left-1/2 -translate-x-1/2 z-30 w-[90%] max-w-xs animate-fade-in">
-          <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white border border-slate-100 text-slate-800 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
-            <LoaderIcon className="text-slate-500" />
-            <span className="text-xs font-medium tracking-tight text-slate-700">Uploading to Drive...</span>
+          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white border border-[#C4E2F5] text-slate-800 shadow-[0_4px_16px_rgba(44,94,173,0.08)]">
+            <LoaderIcon className="text-[#1591DC]" />
+            <span className="text-xs font-semibold tracking-tight text-[#2C5EAD]">Uploading to Drive...</span>
           </div>
         </div>
       )}
 
       {status === 'success' && (
         <div className="absolute top-18 left-1/2 -translate-x-1/2 z-30 w-[90%] max-w-xs animate-fade-in">
-          <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white border border-slate-100 text-slate-800 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
-            <div className="h-4.5 w-4.5 rounded-full bg-emerald-500 flex items-center justify-center text-white">
+          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white border border-[#C4E2F5] text-slate-800 shadow-[0_4px_16px_rgba(44,94,173,0.08)]">
+            <div className="h-5 w-5 rounded-full bg-gradient-to-tr from-[#2C5EAD] to-[#1591DC] flex items-center justify-center text-white">
               <CheckIcon className="h-3 w-3" />
             </div>
-            <span className="text-xs font-medium tracking-tight text-slate-700">Saved successfully</span>
+            <span className="text-xs font-semibold tracking-tight text-[#2C5EAD]">Saved successfully</span>
           </div>
         </div>
       )}
@@ -264,19 +264,19 @@ export default function Home() {
       {/* Full-Screen Light-Themed Error Display */}
       {status === 'error' && (
         <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-slate-50 z-30">
-          <div className="max-w-xs w-full p-5 rounded-2xl bg-white border border-slate-200/80 shadow-md flex flex-col items-center text-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-rose-50 flex items-center justify-center text-rose-500 border border-rose-100">
+          <div className="max-w-xs w-full p-5 rounded-2xl bg-white border border-[#C4E2F5] shadow-lg flex flex-col items-center text-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-[#C4E2F5]/40 flex items-center justify-center text-[#2C5EAD] border border-[#4BB8FA]/30">
               <AlertIcon className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-slate-900">Camera Access Required</h2>
-              <p className="mt-1 text-[11px] text-slate-500 leading-normal">
+              <h2 className="text-sm font-bold text-[#2C5EAD]">Camera Access Required</h2>
+              <p className="mt-1 text-[11px] text-[#2C5EAD]/80 leading-normal">
                 {errorMessage}
               </p>
             </div>
             <button
               onClick={startCamera}
-              className="w-full py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 active:scale-98 transition-all text-xs font-semibold text-white shadow-sm"
+              className="w-full py-2 px-3 rounded-lg bg-[#2C5EAD] hover:bg-[#1591DC] active:scale-98 transition-all text-xs font-semibold text-white shadow-md shadow-[#2C5EAD]/20"
             >
               Try Again
             </button>
@@ -284,13 +284,13 @@ export default function Home() {
         </div>
       )}
 
-      {/* Floating Control Console (Light-Themed Glass) */}
+      {/* Floating Control Console (Light-Themed Glass with Custom Palette) */}
       <footer className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-30">
-        <div className="p-3 rounded-[24px] bg-white/80 backdrop-blur-md border border-slate-200/50 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+        <div className="p-3.5 rounded-[24px] bg-white/80 backdrop-blur-md border border-[#C4E2F5]/50 shadow-[0_4px_24px_rgba(44,94,173,0.08)]">
           <div className="flex w-full items-center justify-between px-3">
             
-            {/* Left: Minimalist Image Thumbnail */}
-            <div className="h-10 w-10 rounded-lg border border-slate-200 bg-slate-50/50 overflow-hidden flex items-center justify-center shadow-inner">
+            {/* Left: Minimalist Image Thumbnail Frame */}
+            <div className="h-10 w-10 rounded-lg border border-[#C4E2F5] bg-[#C4E2F5]/10 overflow-hidden flex items-center justify-center shadow-inner">
               {capturedThumbnail ? (
                 <img
                   src={capturedThumbnail}
@@ -298,20 +298,20 @@ export default function Home() {
                   className="h-full w-full object-cover transition-opacity duration-200"
                 />
               ) : (
-                <div className="h-3 w-3 rounded-full border border-slate-300" />
+                <div className="h-3 w-3 rounded-full border border-[#4BB8FA]/40" />
               )}
             </div>
 
-            {/* Center: Leica/Mirrorless Camera Style Shutter Button */}
+            {/* Center: Mirrorless Camera Style Shutter Button using Palette colors */}
             <button
               type="button"
               onClick={handleCapture}
               disabled={status !== 'idle'}
-              className="group relative flex h-14 w-14 items-center justify-center rounded-full border border-slate-900 bg-transparent active:scale-95 transition-all duration-150"
+              className="group relative flex h-14 w-14 items-center justify-center rounded-full border border-[#2C5EAD] bg-transparent active:scale-95 transition-all duration-150"
               aria-label="Capture photo"
             >
-              <span className={`h-11 w-11 rounded-full bg-slate-900 transition-all duration-200 ${
-                status === 'capturing' ? 'scale-75 bg-slate-400' : 'group-hover:scale-[1.01]'
+              <span className={`h-11 w-11 rounded-full bg-gradient-to-tr from-[#2C5EAD] to-[#1591DC] transition-all duration-200 ${
+                status === 'capturing' ? 'scale-75 opacity-40' : 'group-hover:scale-[1.01]'
               }`} />
               
               {status === 'capturing' && (
@@ -323,7 +323,7 @@ export default function Home() {
 
             {/* Right: Technical Mode Selector */}
             <div className="h-10 w-10 flex items-center justify-center">
-              <span className="text-[10px] font-bold tracking-wider text-slate-400 select-none">FHD</span>
+              <span className="text-[10px] font-bold tracking-wider text-[#2C5EAD]/60 select-none">FHD</span>
             </div>
           </div>
         </div>
