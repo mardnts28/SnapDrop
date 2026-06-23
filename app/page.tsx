@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { uploadImageAction } from "@/app/actions/upload";
 
 // Minimalist, professional SVG Icons
 const CameraIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
@@ -162,16 +163,27 @@ export default function Home() {
       // Log for verification
       console.log("Captured Base64 Image:", base64Image);
 
-      // Simulate network upload delay
-      setTimeout(() => {
-        setStatus('success');
-        
-        // Return to idle state after showing success checkmark
-        setTimeout(() => {
-          setStatus('idle');
-          setCapturedThumbnail(null);
-        }, 3000);
-      }, 1500);
+      // Call direct Google Drive upload Server Action
+      uploadImageAction(base64Image)
+        .then((result) => {
+          if (result.success) {
+            setStatus('success');
+            // Return to idle state after showing success checkmark
+            setTimeout(() => {
+              setStatus('idle');
+              setCapturedThumbnail(null);
+            }, 3000);
+          } else {
+            console.error("Upload action failed:", result.message);
+            setStatus('error');
+            setErrorMessage(result.message);
+          }
+        })
+        .catch((err) => {
+          console.error("Upload network/server error:", err);
+          setStatus('error');
+          setErrorMessage(err.message || "Failed to upload to Google Drive.");
+        });
 
     } catch (err: any) {
       console.error("Error capturing photo:", err);
