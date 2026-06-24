@@ -74,6 +74,39 @@ const LoaderIcon = ({ className = "h-4 w-4" }: { className?: string }) => (
   </svg>
 );
 
+const CloseIcon = ({ className = "h-4 w-4" }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
+const ExternalLinkIcon = ({ className = "h-4 w-4" }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+    <polyline points="15 3 21 3 21 9" />
+    <line x1="10" y1="14" x2="21" y2="3" />
+  </svg>
+);
+
 export default function Home() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [status, setStatus] = useState<'idle' | 'capturing' | 'success' | 'error'>('idle');
@@ -81,6 +114,8 @@ export default function Home() {
   const [capturedThumbnail, setCapturedThumbnail] = useState<string | null>(null);
   const [thumbnailType, setThumbnailType] = useState<'image' | 'video' | null>(null);
   const [showShutterFlash, setShowShutterFlash] = useState<boolean>(false);
+  const [lastFileId, setLastFileId] = useState<string | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
 
   // Video & recording specific states
   const [mode, setMode] = useState<'photo' | 'video'>('photo');
@@ -188,11 +223,10 @@ export default function Home() {
         .then((result) => {
           if (result.success) {
             setStatus('success');
+            if (result.fileId) setLastFileId(result.fileId);
             // Return to idle state after showing success checkmark
             setTimeout(() => {
               setStatus('idle');
-              setCapturedThumbnail(null);
-              setThumbnailType(null);
             }, 3000);
           } else {
             console.error("Upload action failed:", result.message);
@@ -283,14 +317,13 @@ export default function Home() {
             .then((result) => {
               if (result.success) {
                 setStatus('success');
+                if (result.fileId) setLastFileId(result.fileId);
                 // Store video preview URL for thumbnail
                 setCapturedThumbnail(URL.createObjectURL(blob));
                 setThumbnailType('video');
                 
                 setTimeout(() => {
                   setStatus('idle');
-                  setCapturedThumbnail(null);
-                  setThumbnailType(null);
                 }, 3000);
               } else {
                 console.error("Upload action failed:", result.message);
@@ -496,8 +529,22 @@ export default function Home() {
 
           <div className="flex w-full items-center justify-between px-3">
             
-            {/* Left: Minimalist Image/Video Thumbnail Frame */}
-            <div className="h-10 w-10 rounded-lg border border-[#C4E2F5] bg-[#C4E2F5]/10 overflow-hidden flex items-center justify-center shadow-inner">
+            {/* Left: Clickable Persistent Image/Video Thumbnail Frame */}
+            <button
+              type="button"
+              onClick={() => {
+                if (capturedThumbnail) {
+                  setIsPreviewOpen(true);
+                }
+              }}
+              disabled={!capturedThumbnail}
+              className={`h-11 w-11 rounded-xl border border-[#C4E2F5] bg-white overflow-hidden flex items-center justify-center shadow-sm relative transition-all duration-200 ${
+                capturedThumbnail 
+                  ? 'cursor-pointer hover:scale-105 active:scale-95 ring-2 ring-[#1591DC]/10' 
+                  : 'opacity-40 cursor-not-allowed'
+              }`}
+              title={capturedThumbnail ? "View recent capture" : "No recent capture"}
+            >
               {capturedThumbnail ? (
                 thumbnailType === 'video' ? (
                   <video
@@ -511,14 +558,21 @@ export default function Home() {
                 ) : (
                   <img
                     src={capturedThumbnail}
-                    alt="Captured Thumbnail"
+                    alt="Recent Capture"
                     className="h-full w-full object-cover transition-opacity duration-200"
                   />
                 )
               ) : (
-                <div className="h-3 w-3 rounded-full border border-[#4BB8FA]/40" />
+                <div className="h-3.5 w-3.5 rounded-full border-2 border-[#4BB8FA]/40 bg-[#C4E2F5]/10" />
               )}
-            </div>
+              
+              {/* Eye hover indicator */}
+              {capturedThumbnail && (
+                <div className="absolute inset-0 bg-[#2C5EAD]/30 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity duration-150">
+                  <span className="text-[9px] font-bold text-white tracking-widest uppercase">VIEW</span>
+                </div>
+              )}
+            </button>
 
             {/* Center: Mirrorless Camera Style Shutter / Record Button */}
             <button
@@ -526,7 +580,9 @@ export default function Home() {
               onClick={triggerAction}
               disabled={status === 'capturing' || (status !== 'idle' && !isRecording)}
               className={`group relative flex h-14 w-14 items-center justify-center rounded-full border transition-all duration-150 active:scale-95 ${
-                mode === 'video' ? 'border-red-500' : 'border-[#2C5EAD]'
+                mode === 'video' 
+                  ? 'border-red-500 bg-red-50' 
+                  : 'border-[#2C5EAD] bg-white'
               }`}
               aria-label={mode === 'photo' ? "Capture photo" : (isRecording ? "Stop recording" : "Start recording")}
             >
@@ -558,6 +614,72 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Light-Themed Preview Modal for Recent Captures */}
+      {isPreviewOpen && capturedThumbnail && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-sm border border-[#C4E2F5] shadow-[0_24px_50px_rgba(44,94,173,0.18)] overflow-hidden flex flex-col gap-4 p-5 animate-scale-up">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold tracking-wider text-[#2C5EAD] uppercase">
+                Recent Capture
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsPreviewOpen(false)}
+                className="h-7 w-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors"
+                aria-label="Close preview"
+              >
+                <CloseIcon className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Media Body */}
+            <div className="aspect-[3/4] w-full rounded-2xl border border-[#C4E2F5] bg-slate-50 overflow-hidden flex items-center justify-center relative">
+              {thumbnailType === 'video' ? (
+                <video
+                  src={capturedThumbnail}
+                  className="h-full w-full object-cover"
+                  controls
+                  autoPlay
+                  playsInline
+                />
+              ) : (
+                <img
+                  src={capturedThumbnail}
+                  alt="Full preview"
+                  className="h-full w-full object-cover"
+                />
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-2 w-full mt-1">
+              {lastFileId && (
+                <a
+                  href={`https://drive.google.com/file/d/${lastFileId}/view?usp=drivesdk`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 rounded-xl bg-[#2C5EAD] text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-[#2C5EAD]/20 hover:bg-[#1591DC] transition-colors"
+                >
+                  <ExternalLinkIcon className="h-3.5 w-3.5" />
+                  View in Google Drive
+                </a>
+              )}
+              
+              {/* Native Download Fallback */}
+              <a
+                href={capturedThumbnail}
+                download={thumbnailType === 'video' ? 'snapdrop_video.webm' : 'snapdrop_photo.jpg'}
+                className="w-full py-2.5 rounded-xl bg-slate-100 text-[#2C5EAD] font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-slate-200 transition-colors"
+              >
+                Download to Device
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
