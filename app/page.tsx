@@ -226,19 +226,24 @@ export default function Home() {
     setRecordingTime(0);
 
     // Select suitable video MIME types depending on platform support
-    let options = { mimeType: 'video/webm;codecs=vp9' };
-    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-      options = { mimeType: 'video/webm;codecs=vp8' };
+    let mimeType = 'video/webm;codecs=vp9';
+    if (!MediaRecorder.isTypeSupported(mimeType)) {
+      mimeType = 'video/webm;codecs=vp8';
     }
-    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-      options = { mimeType: 'video/webm' };
+    if (!MediaRecorder.isTypeSupported(mimeType)) {
+      mimeType = 'video/webm';
     }
-    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-      options = { mimeType: 'video/mp4' }; // Safari fallback
+    if (!MediaRecorder.isTypeSupported(mimeType)) {
+      mimeType = 'video/mp4'; // Safari fallback
     }
-    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-      options = { mimeType: '' }; // Fallback to browser default
+    if (!MediaRecorder.isTypeSupported(mimeType)) {
+      mimeType = ''; // Fallback to browser default
     }
+
+    // Limit bitrate to ~800 Kbps so the 30s video base64 size stays under Vercel's 4.5MB payload limit
+    const options: MediaRecorderOptions = mimeType 
+      ? { mimeType, videoBitsPerSecond: 800000 }
+      : { videoBitsPerSecond: 800000 };
 
     try {
       const recorder = new MediaRecorder(stream, options);
