@@ -6,6 +6,9 @@ export interface UploadResult {
   fileId?: string;
 }
 
+// Allowed base MIME type prefixes
+const ALLOWED_MIME_PREFIXES = ["image/", "video/"];
+
 export async function uploadFileAction(
   base64Data: string,
   mimeType: string = "image/jpeg",
@@ -14,6 +17,7 @@ export async function uploadFileAction(
   try {
     const scriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
     const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID || "";
+    const secretToken = process.env.UPLOAD_SECRET_TOKEN;
 
     if (!scriptUrl) {
       console.error("Upload failed: Missing GOOGLE_APPS_SCRIPT_URL.");
@@ -23,19 +27,50 @@ export async function uploadFileAction(
       };
     }
 
-    // Determine default filename if not provided
-    const extension = mimeType.split("/")[1] || "jpg";
-    const name = fileName || `snap_${new Date().toISOString().replace(/[:.]/g, "-")}.${extension === "jpeg" ? "jpg" : extension}`;
+    // ── Security: File type validation ──────────────────────────────────────
+    // Strip codec details from MIME type (e.g. "video/webm; codecs=vp9" → "video/webm")
+    const baseMimeType = mimeType.split(";")[0].trim().toLowerCase();
+
+    const isAllowed = ALLOWED_MIME_PREFIXES.some((prefix) =>
+      baseMimeType.startsWith(prefix)
+    );
+
+    if (!isAllowed) {
+      console.error(`Rejected upload: unsupported MIME type "${baseMimeType}".`);
+      return {
+        success: false,
+        message: `File type "${baseMimeType}" is not allowed. Only images and videos are accepted.`,
+      };
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
+    // Determine default filename
+    const extension = baseMimeType.split("/")[1] || "jpg";
+    const name =
+      fileName ||
+      `snap_${new Date().toISOString().replace(/[:.]/g, "-")}.${
+        extension === "jpeg" ? "jpg" : extension
+      }`;
+
+    // Build request headers — include secret token if configured
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (secretToken) {
+      headers["X-Upload-Token"] = secretToken;
+    }
 
     // POST the base64 file to the Google Apps Script web app
     const response = await fetch(scriptUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({
         fileData: base64Data,
-        mimeType,
+        mimeType: baseMimeType,
         fileName: name,
         folderId,
+        // Also include token in body as a fallback (Apps Script reads body, not headers)
+        token: secretToken || "",
       }),
       redirect: "follow",
     });
@@ -52,7 +87,9 @@ export async function uploadFileAction(
     const result = await response.json();
 
     if (result.success) {
-      console.log(`Successfully uploaded file to Google Drive. File ID: ${result.fileId}`);
+      console.log(
+        `Successfully uploaded file to Google Drive. File ID: ${result.fileId}`
+      );
       return {
         success: true,
         message: "File uploaded successfully to Google Drive.",

@@ -182,9 +182,6 @@ export default function Home() {
       // Store thumbnail for success state UI
       setCapturedThumbnail(base64Image);
       setThumbnailType('image');
-      
-      // Log for verification
-      console.log("Captured Base64 Image:", base64Image);
 
       // Call direct Google Drive upload Server Action
       uploadFileAction(base64Image, "image/jpeg")
