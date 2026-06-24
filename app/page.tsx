@@ -107,6 +107,21 @@ const ExternalLinkIcon = ({ className = "h-4 w-4" }: { className?: string }) => 
   </svg>
 );
 
+const FlipCameraIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l.57-1.19" />
+  </svg>
+);
+
 export default function Home() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [status, setStatus] = useState<'idle' | 'capturing' | 'success' | 'error'>('idle');
@@ -116,6 +131,7 @@ export default function Home() {
   const [showShutterFlash, setShowShutterFlash] = useState<boolean>(false);
   const [lastFileId, setLastFileId] = useState<string | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
 
   // Video & recording specific states
   const [mode, setMode] = useState<'photo' | 'video'>('photo');
@@ -141,7 +157,7 @@ export default function Home() {
 
       const constraints: MediaStreamConstraints = {
         video: {
-          facingMode: { ideal: "environment" },
+          facingMode: { ideal: facingMode },
           width: { ideal: 1280 },
           height: { ideal: 720 }
         },
@@ -177,7 +193,7 @@ export default function Home() {
         clearInterval(timerRef.current);
       }
     };
-  }, [mode]);
+  }, [mode, facingMode]);
 
   const handleCapture = () => {
     if (status === 'capturing') return;
@@ -208,7 +224,11 @@ export default function Home() {
         throw new Error("Could not acquire 2D canvas context.");
       }
 
-      // Draw the video frame to the canvas
+      // Draw the video frame to the canvas (mirrored if using front camera)
+      if (facingMode === 'user') {
+        context.translate(videoWidth, 0);
+        context.scale(-1, 1);
+      }
       context.drawImage(video, 0, 0, videoWidth, videoHeight);
 
       // Convert to compressed base64 JPEG string (85% quality)
@@ -390,7 +410,8 @@ export default function Home() {
           playsInline
           autoPlay
           muted
-          className="absolute inset-0 h-full w-full object-cover z-0 bg-black"
+          className="absolute inset-0 h-full w-full object-cover z-0 bg-black transition-all duration-300"
+          style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'scaleX(1)' }}
         />
       )}
 
@@ -605,12 +626,20 @@ export default function Home() {
               )}
             </button>
 
-            {/* Right: Technical Mode Selector */}
-            <div className="h-10 w-10 flex items-center justify-center select-none">
-              <span className="text-[10px] font-bold tracking-wider text-[#2C5EAD]/60">
-                {mode === 'photo' ? 'FHD' : 'HD'}
-              </span>
-            </div>
+             {/* Right: Flip Camera Toggle (iOS Style) */}
+            <button
+              type="button"
+              disabled={isRecording || status === 'capturing'}
+              onClick={() => setFacingMode(prev => prev === 'environment' ? 'user' : 'environment')}
+              className={`h-11 w-11 rounded-xl border border-[#C4E2F5] bg-white flex items-center justify-center shadow-sm text-[#2C5EAD] transition-all duration-200 ${
+                isRecording || status === 'capturing'
+                  ? 'opacity-40 cursor-not-allowed'
+                  : 'cursor-pointer hover:scale-105 active:scale-95 hover:bg-slate-50'
+              }`}
+              title="Switch Camera (Front/Back)"
+            >
+              <FlipCameraIcon className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </footer>
